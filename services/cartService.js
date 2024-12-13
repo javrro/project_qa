@@ -4,6 +4,10 @@ const Product = require('../models/product');
 
 class CartService {
   static async createCart(userId) {
+    //added validation to catch invalid userIds
+    if(!userId || userId % 1 !== 0 || userId === " "){
+      throw new Error('userId must be a valid Integer')
+    }
     return await Cart.create({ userId });
   }
 

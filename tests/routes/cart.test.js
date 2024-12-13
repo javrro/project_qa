@@ -37,6 +37,17 @@ describe("Cart Routes", () => {
     });
   });
 
+  describe("POST /api/carts/:userId", () => {
+    it("should return 400 error", async () => {
+      const userId = null;
+      const response = await request(app)
+        .post("/api/carts/" + userId)
+        .expect(400);
+
+      expect(response.body).toHaveProperty("error", "userId must be a valid Integer");
+    });
+  });
+
   describe("POST /api/carts/:cartId/items", () => {
     const userId = "1";
     let cart, product;
@@ -69,6 +80,61 @@ describe("Cart Routes", () => {
       expect(response.body).toHaveProperty("quantity", quantity);
       expect(response.body).toHaveProperty("updatedAt");
       expect(response.body).toHaveProperty("createdAt");
+    });
+  });
+
+  //test unhappy path add item to cart when inventory too low
+  describe("POST /api/carts/:cartId/items", () => {
+    const userId = "1";
+    let cart, product;
+
+    beforeEach(async () => {
+      const category = await Category.create({ name: "Test Category" });
+      product = await Product.create({
+        name: "Test Product",
+        price: 100,
+        inventory: 10,
+        categoryId: category.id,
+      });
+      cart = await Cart.create({ userId: userId });
+    });
+
+    it("should return error if quantity ti high", async () => {
+      const quantity = 100;
+
+      const response = await request(app)
+        .post("/api/carts/" + cart.id + "/items")
+        .send({
+          productId: product.id,
+          quantity: quantity,
+        })
+        .expect(400);
+
+      expect(response.body).toHaveProperty("error", "Not enough inventory available");
+    });
+  });
+
+  //test unhappy path add item to cart when item doesnt exist
+  describe("POST /api/carts/:cartId/items", () => {
+    const userId = "1";
+    let cart;
+
+    beforeEach(async () => {
+      cart = await Cart.create({ userId: userId });
+    });
+
+    it("should return error if quantity ti high", async () => {
+      const quantity = 100;
+
+      const response = await request(app)
+        .post("/api/carts/" + cart.id + "/items")
+        .send({
+          productId: "123",
+          quantity: quantity,
+        })
+        .expect(400);
+
+      expect(response.body).toHaveProperty("error", "Product not found");
     });
   });
 
