@@ -40,6 +40,11 @@ class CartService {
   }
 
   static async getCartItems(cartId) {
+
+    if(!cartId || cartId % 1 !== 0 || cartId === " "){
+      throw new Error('cartId must be a valid Integer')
+    }
+
     const items = await CartItem.findAll({
       where: { cartId },
       include: Product,
