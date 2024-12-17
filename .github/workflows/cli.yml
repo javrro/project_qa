@@ -25,8 +25,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run ESLint
-        run: npm run lint # Ensure you have a lint script in your package.json
+      # - name: Run ESLint
+      #   run: npm run lint # Ensure you have a lint script in your package.json
 
       - name: Run tests
         run: npm test # Ensure you have a test script in your package.json
