@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const { initTestDb, closeTestDb } = require("../setup/testDb");
 const categoryRouter = require("../../routes/categories");
 const Category = require("../../models/category");
+const ProductService = require("../../services/productService");
 // const {etag} = require("express/lib/utils");
 
 const app = express();
@@ -36,6 +37,23 @@ describe("Category Routes", () => {
 
       expect(response.body).toHaveProperty("name", categoryData.name);
       expect(response.body).toHaveProperty("id");
+    });
+    it('should return an error when exception is thrown', async () => {
+      const testMessage = "Test Error";
+
+      jest.spyOn(Category, 'create')
+          .mockImplementation(() => { throw new Error(testMessage) });
+
+      const categoryData = {
+        name: "Electronics",
+      };
+
+      const response = await request(app)
+          .post("/api/categories/")
+          .send(categoryData)
+          .expect(400);
+
+      expect(response.body.error).toEqual(testMessage);
     });
   });
 
